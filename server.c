@@ -447,6 +447,7 @@ void* request_handler(void *arg)
 				}
 				else
 				{
+                    close(sock);
 					pthread_exit(NULL);
 				}
 				
@@ -470,6 +471,7 @@ void* request_handler(void *arg)
 					char log_buff[1024] = {0};
 					sprintf(log_buff, "[sockfd:%4d]\tresponse:%s\tquerty_string:%s\tGET\tOK", sock, path, string_utf);
 					write_log(log_buff);
+                    close(sock);
 					pthread_exit(NULL);
 				}
 			}
@@ -483,6 +485,11 @@ void* request_handler(void *arg)
 		{
 			end(sock, statu_code);
 		}
+        else
+        {
+            close(sock);
+            pthread_exit(NULL);
+        }
 	}
 	else
 	{
@@ -491,6 +498,7 @@ void* request_handler(void *arg)
 		statu_code = 400;
 		end(sock, statu_code);
 	}
+    return NULL;
 }
 
 //记录日志
@@ -507,6 +515,7 @@ void write_log(char *message)
 	pthread_mutex_lock(&mutex);
 	write(fd, mess_buff, strlen(mess_buff));
 	pthread_mutex_unlock(&mutex);
+    close(fd);
 }
 
 //用法
