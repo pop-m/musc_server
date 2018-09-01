@@ -112,6 +112,7 @@ void echo_error(int sock, int statu_code, char descri[], char page_path[])
 	send(sock, "\r\n", 2, 0);
 	int fd =open(page_path, O_RDONLY);
 	sendfile(sock, fd, NULL, st.st_size);
+	close(fd);
 }
 
 
@@ -159,6 +160,7 @@ int get_response(int sock, char *path, int length, char *type)
 	char log_buff[1024] = {0};
 	sprintf(log_buff, "[sockfd:%4d]\tresponse:%s\tGET\tok", sock, path);
 	write_log(log_buff);
+	close(fd);
 	return 200;
 }
 
@@ -447,7 +449,7 @@ void* request_handler(void *arg)
 				}
 				else
 				{
-                    close(sock);
+					close(sock);
 					pthread_exit(NULL);
 				}
 				
@@ -471,7 +473,7 @@ void* request_handler(void *arg)
 					char log_buff[1024] = {0};
 					sprintf(log_buff, "[sockfd:%4d]\tresponse:%s\tquerty_string:%s\tGET\tOK", sock, path, string_utf);
 					write_log(log_buff);
-                    close(sock);
+					close(sock);
 					pthread_exit(NULL);
 				}
 			}
@@ -485,11 +487,12 @@ void* request_handler(void *arg)
 		{
 			end(sock, statu_code);
 		}
-        else
-        {
-            close(sock);
-            pthread_exit(NULL);
-        }
+		else
+		{
+			close(sock);
+			pthread_exit(NULL);
+		}
+
 	}
 	else
 	{
@@ -498,7 +501,6 @@ void* request_handler(void *arg)
 		statu_code = 400;
 		end(sock, statu_code);
 	}
-    return NULL;
 }
 
 //记录日志
@@ -515,7 +517,7 @@ void write_log(char *message)
 	pthread_mutex_lock(&mutex);
 	write(fd, mess_buff, strlen(mess_buff));
 	pthread_mutex_unlock(&mutex);
-    close(fd);
+	close(fd);
 }
 
 //用法
