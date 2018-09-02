@@ -31,7 +31,7 @@ enum pipe_sign
 pthread_mutex_t mutex;
 
 //读取一行
-void read_line(int sock, char *buff, int size);
+int read_line(int sock, char *buff, int size);
 
 
 //结束函数
