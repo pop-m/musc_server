@@ -63,7 +63,7 @@ int read_line(int sock, char *buff, int size)
 				int ret = recv(sock, &tmp, 1, MSG_PEEK);
 				if(ret < 0)//读取失败
 				{
-					break;
+					return -1;
 				}
 				else//读成功
 				{
@@ -545,7 +545,6 @@ void usage(char *arg)
 //初始化监听套接字,以及互斥量,信号忽略
 int sock_init(int port)
 {
-	daemon(1,0);
 	signal(SIGPIPE, SIG_IGN);
 	//初始化互斥量
 	pthread_mutex_init(&mutex, NULL);

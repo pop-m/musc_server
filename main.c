@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 		write_log("init OK!");
 	}
 	//开始接客
+	daemon(1,0);
 	while(1)
 	{
 
