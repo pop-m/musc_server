@@ -77,13 +77,12 @@ int read_line(int sock, char *buff, int size)
 					}
 				}
 			}
-			//此时已经将\r  \r\n  \n都准换为\n了
+			//此时已经将\r  \r\n  \n都转换为\n了
 			buff[i++] = tmp;
 		}
 		else//读取出错
 		{
 			return -1;
-			break;
 		}
 	}
 	//将\0添加上去
@@ -139,7 +138,6 @@ void end(int sock, int statu_code)
 		break;
 	}
 	close(sock);
-	printf("线程已经退出\n");
 	pthread_exit(NULL);
 }
 
@@ -369,13 +367,11 @@ void* request_handler(void *arg)
 	char line[MAX] = {0};
 	char method[MAX/10] = {0};
 	int statu_code = 200;
-	printf("开始读取数据\n");
 	if(read_line(sock, line, MAX-1) == -1)
 	{
 		statu_code = 400;
 		end(sock, statu_code);
 	}
-	printf("数据已经读取\n");
 	int i=0;
 	int j=0;
 	char path[MAX] = {0};
@@ -392,7 +388,6 @@ void* request_handler(void *arg)
 	i = 0;
 	j++;
 	//读取URL(包含URI和参数)
-	printf("开始拿url和query_string\n");
 	while(i < sizeof(url) && j < line_len && !isspace(line[j]))
 	{
 		url[i++] = line[j++];
@@ -415,7 +410,6 @@ void* request_handler(void *arg)
 		}
 		i++;
 	}
-	printf("已经拿到url和query_string\n");
 	char string_utf[MAX] = {0};
 	url_to_gb_or_utf(query_string, string_utf);
 
@@ -435,7 +429,6 @@ void* request_handler(void *arg)
 			char log_buff[MAX] = {0};
 			sprintf(log_buff, "[sockfd:%4d]\tresponse: not foundt\t%s\tERROR\tGET", sock, path);
 			write_log(log_buff);
-			printf("资源不存在\n");
 			end(sock, statu_code);
 		}
 		else
@@ -453,7 +446,6 @@ void* request_handler(void *arg)
 					char log_buff[MAX] = {0};
 					sprintf(log_buff, "[sockfd:%4d]\tresponse: not found\t%s\tERROR\tGET", sock, path);
 					write_log(log_buff);
-					printf("资源不存在\n");
 					end(sock, statu_code);
 				}
 			}
@@ -463,7 +455,6 @@ void* request_handler(void *arg)
 			
 			if((st.st_mode & S_IXUSR) || (st.st_mode & S_IXGRP) || (st.st_mode & S_IXOTH))
 			{
-				printf("具有可执行权限\n");
 				//所访问的资源有可执行权限
 				statu_code = exe_cgi(sock, method, path, query_string);
 				if(statu_code != 200)
@@ -473,7 +464,6 @@ void* request_handler(void *arg)
 				else
 				{
 					close(sock);
-					printf("线程已经退出\n");
 					pthread_exit(NULL);
 				}
 				
@@ -481,7 +471,6 @@ void* request_handler(void *arg)
 			else
 			{
 				//不是可执行文件(只需要将文件数据发送给客户端即可)
-				printf("文本文件\n");
 				char log_buff[1024] = {0};
 				sprintf(log_buff, "[sockfd:%4d]\trequest:%s\tquerty_string:%s\tGET", sock, path, string_utf);
 				write_log(log_buff);
@@ -499,7 +488,6 @@ void* request_handler(void *arg)
 					sprintf(log_buff, "[sockfd:%4d]\tresponse:%s\tquerty_string:%s\tGET\tOK", sock, path, string_utf);
 					write_log(log_buff);
 					close(sock);
-					printf("线程已经退出\n");
 					pthread_exit(NULL);
 				}
 			}
@@ -516,7 +504,6 @@ void* request_handler(void *arg)
 		else
 		{
 			close(sock);
-			printf("线程已经退出\n");
 			pthread_exit(NULL);
 		}
 
@@ -537,7 +524,6 @@ void write_log(char *message)
 	if(fd < 0)
 	{
 		perror("write log");
-		printf("日志线程已经退出\n");
 		pthread_exit(NULL);
 	}
 	char mess_buff[1024];
@@ -559,6 +545,7 @@ void usage(char *arg)
 //初始化监听套接字,以及互斥量,信号忽略
 int sock_init(int port)
 {
+	daemon(1,0);
 	signal(SIGPIPE, SIG_IGN);
 	//初始化互斥量
 	pthread_mutex_init(&mutex, NULL);
