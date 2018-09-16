@@ -187,9 +187,6 @@ void return_html(char *mp3_name, char *mp3_url, char *ret)
 	seq_push(&seq, 0);
 	int length = strlen(seq.data);
 	write(1, seq.data, length+1);
-
-	fd = open("wwwroot/ret.txt", O_WRONLY);
-	write(fd, seq.data, length+1);
 }
 
 
