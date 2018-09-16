@@ -61,7 +61,7 @@ int read_line(int sock, char *buff, int size)
 			if(tmp == '\r')//如果读取到的是一个\r说明需要窥探一下下一个字符是不是\n
 			{
 				int ret = recv(sock, &tmp, 1, MSG_PEEK);
-				if(ret < 0)//读取失败
+				if(ret <= 0)//读取失败
 				{
 					return -1;
 				}
@@ -561,7 +561,7 @@ int sock_init(int port)
 	//因为服务器要在算时间内处理大量的连接,所以服务器上就会出现大量的TIME_WAIT连接
 	//因此需要设置setsocketopt REUSEADD来重用TIME_WAIT状态的连接
 	int opt = 1;
-	setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+	setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));//防止服务器先关闭而出现大量的close_wait状态的sock_fd
 
 	//绑定
 	self_addr.sin_family = AF_INET;
